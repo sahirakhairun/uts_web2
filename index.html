@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="assets/style.css" />
+
+    <!-- Chart.js dan plugin DataLabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f7f9fc;
+        margin: 0;
+        padding: 0;
+      }
+
+      .dashboard-container {
+        width: 90%;
+        max-width: 900px;
+        margin: 40px auto;
+      }
+
+      .dashboard-card,
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+
+      h1,
+      h2 {
+        color: #2d3436;
+      }
+
+      .subtitle {
+        color: #636e72;
+        font-size: 14px;
+        margin-bottom: 25px;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .stat-box {
+        background: #f1f2f6;
+        border-radius: 12px;
+        padding: 15px;
+        width: 48%;
+        text-align: center;
+      }
+
+      .stat-box h3 {
+        margin: 0;
+        color: #0984e3;
+      }
+
+      .stat-box .count {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2d3436;
+      }
+
+      .action-buttons {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .btn-dashboard {
+        background-color: #0984e3;
+        color: white;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.3s;
+      }
+
+      .btn-dashboard:hover {
+        background-color: #74b9ff;
+      }
+
+      .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.8s forwards;
+      }
+
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- === FORM 1: Informasi Umum === -->
+      <div class="dashboard-card fade-in">
+        <h1>🎓 Dashboard Akademik</h1>
+        <p class="subtitle">
+          Selamat datang di Sistem Data Mahasiswa & Jurusan (Demo Tampilan)
+        </p>
+
+        <div class="stats">
+          <div class="stat-box">
+            <h3>👩‍🎓 Total Mahasiswa</h3>
+            <p class="count">120</p>
+          </div>
+          <div class="stat-box">
+            <h3>🏫 Total Jurusan</h3>
+            <p class="count">5</p>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="#" class="btn-dashboard">Kelola Mahasiswa</a>
+          <a href="#" class="btn-dashboard">Kelola Jurusan</a>
+        </div>
+      </div>
+
+      <!-- === FORM 2: Grafik Data Mahasiswa per Jurusan === -->
+      <div class="card fade-in" style="margin-top: 30px">
+        <h2>📊 Statistik Mahasiswa Berdasarkan Jurusan</h2>
+        <canvas id="chartJurusan" height="120"></canvas>
+      </div>
+    </div>
+
+    <script>
+      // Efek fade-in
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.style.opacity = "0";
+        document.body.style.transition = "opacity 0.6s ease";
+        setTimeout(() => {
+          document.body.style.opacity = "1";
+        }, 50);
+      });
+
+      // === Data contoh (ganti sesuai kebutuhan) ===
+      const labels = [
+        "Informatika",
+        "Sistem Informasi",
+        "Teknik Komputer",
+        "Manajemen",
+        "Akuntansi",
+      ];
+      const dataValues = [35, 25, 20, 25, 15];
+      const totalMahasiswa = dataValues.reduce((a, b) => a + b, 0);
+
+      // === Inisialisasi Grafik Chart.js ===
+      const ctx = document.getElementById("chartJurusan");
+      const chartJurusan = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Jumlah Mahasiswa",
+              data: dataValues,
+              backgroundColor: [
+                "#74b9ff",
+                "#a29bfe",
+                "#81ecec",
+                "#fab1a0",
+                "#ff7675",
+              ],
+              borderRadius: 10,
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const value = context.parsed.y;
+                  const percent =
+                    totalMahasiswa > 0
+                      ? ((value / totalMahasiswa) * 100).toFixed(1) + "%"
+                      : "0%";
+                  return `${value} mahasiswa (${percent})`;
+                },
+              },
+            },
+            datalabels: {
+              color: "#2d3436",
+              anchor: "end",
+              align: "top",
+              font: {
+                weight: "bold",
+              },
+              formatter: (value) => {
+                if (totalMahasiswa === 0) return "0%";
+                const percent = ((value / totalMahasiswa) * 100).toFixed(1);
+                return `${value} (${percent}%)`;
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 5 },
+            },
+            x: {
+              grid: { display: false },
+            },
+          },
+        },
+        plugins: [ChartDataLabels],
+      });
+    </script>
+  </body>
+</html>
